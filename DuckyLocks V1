@@ -172,7 +172,7 @@ local SpeedButton = PlayerPageSection:Button({
         local UserInputService = game:GetService("UserInputService")
         local RunService = game:GetService("RunService")
 
-        getgenv().Multiplier = 6
+        getgenv().Multiplier = 5
         local SpeedEnabled = false
 
         UserInputService.InputBegan:Connect(function(input)
