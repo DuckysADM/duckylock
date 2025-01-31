@@ -3,52 +3,103 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/DuckysADM/Loading/ref
 
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/blix200/murcery-documentation/refs/heads/main/UI%20lib%202"))()
 
-local Window = Library:New({
-    Name = "DuckyADM Script",
-})
+local Window = Library:New({ Name = "DuckyADM Script" })
 
 local Page = Window:Page({ Name = "Main" })
 local Page2 = Window:Page({ Name = "Visuals" })
 local Page3 = Window:Page({ Name = "Player" })
 
 local PageSection1 = Page:Section({ Name = "Main", Fill = true, Side = "Left" })
-local Button1 = PageSection1:Button({
+local Page2Section2 = Page2:Section({ Name = "Main", Fill = true, Side = "Right" })
+local PlayerPageSection = Page3:Section({ Name = "Player Functions", Fill = true, Side = "Left" })
+
+-- Camlock Button
+PageSection1:Button({
     Name = "Camlock",
-    callback = function(value)
+    callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/DuckysADM/Good-Lock/refs/heads/main/Lock"))()
     end
 })
 
-local Button2 = PageSection1:Button({
+-- Hitbox Expander Button
+PageSection1:Button({
     Name = "Hitbox Expander",
-    callback = function(value)
-        -- Hitbox Expander functionality
+    callback = function()
+        -- Add Hitbox Expander functionality here
     end
 })
 
-local Page2Section2 = Page2:Section({ Name = "Main", Fill = true, Side = "Right" })
-local Button1 = Page2Section2:Button({
-    Name = "Box ESP",
-    callback = function(value)
-        -- Box ESP functionality
-    end
-})
+-- ESP Variables
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+local ESP_Enabled = false
+local ESP_Objects = {}
 
-local Toggle1 = PageSection1:Toggle({
-    Name = "etc",
+-- Function to Create ESP Name Tags
+local function CreateESP(plr)
+    if plr == Players.LocalPlayer then return end
+    if ESP_Objects[plr] then return end
+
+    local text = Drawing.new("Text")
+    text.Size = 15
+    text.Color = Color3.fromRGB(255, 255, 255)
+    text.Outline = true
+    text.Center = true
+    text.Visible = false
+    ESP_Objects[plr] = text
+
+    RunService.RenderStepped:Connect(function()
+        if ESP_Enabled and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            local rootPos, onScreen = Camera:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position)
+            if onScreen then
+                text.Position = Vector2.new(rootPos.X, rootPos.Y - 50)
+                text.Text = plr.Name
+                text.Visible = true
+            else
+                text.Visible = false
+            end
+        else
+            text.Visible = false
+        end
+    end)
+end
+
+-- Function to Toggle ESP
+local function ToggleESP(state)
+    ESP_Enabled = state
+    if not state then
+        for _, obj in pairs(ESP_Objects) do
+            obj.Visible = false
+        end
+    else
+        for _, plr in ipairs(Players:GetPlayers()) do
+            CreateESP(plr)
+        end
+    end
+end
+
+-- Apply ESP to Existing Players
+for _, player in ipairs(Players:GetPlayers()) do
+    CreateESP(player)
+end
+
+-- Apply ESP to New Players
+Players.PlayerAdded:Connect(CreateESP)
+
+-- ESP Toggle
+Page2Section2:Toggle({
+    Name = "ESP",
     Default = false,
     callback = function(value)
-        -- etc toggle functionality
+        ToggleESP(value)
     end
 })
 
--- Player Page Section
-local PlayerPageSection = Page3:Section({ Name = "Player Functions", Fill = true, Side = "Left" })
-
 -- Fly Button
-local FlyButton = PlayerPageSection:Button({
+PlayerPageSection:Button({
     Name = "Fly (X)",
-    callback = function(value)
+    callback = function()
         local plr = game.Players.LocalPlayer
         local mouse = plr:GetMouse()
 
@@ -160,29 +211,20 @@ local FlyButton = PlayerPageSection:Button({
 })
 
 -- Speed Button
-local SpeedButton = PlayerPageSection:Button({
+PlayerPageSection:Button({
     Name = "Speed (C)",
-    callback = function(value)
-        repeat wait() until game:IsLoaded()
-
-        local Players = game:GetService("Players")
-        local LocalPlayer = Players.LocalPlayer
-        repeat wait() until LocalPlayer.Character
-
-        local UserInputService = game:GetService("UserInputService")
-        local RunService = game:GetService("RunService")
-
+    callback = function()
         getgenv().Multiplier = 5
         local SpeedEnabled = false
+        local plr = game.Players.LocalPlayer
+        local RunService = game:GetService("RunService")
 
-        UserInputService.InputBegan:Connect(function(input)
+        game:GetService("UserInputService").InputBegan:Connect(function(input)
             if input.KeyCode == Enum.KeyCode.C then
                 SpeedEnabled = not SpeedEnabled
-                if SpeedEnabled then
-                    repeat
-                        LocalPlayer.Character.HumanoidRootPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame + LocalPlayer.Character.Humanoid.MoveDirection * Multiplier
-                        RunService.Stepped:Wait()
-                    until not SpeedEnabled
+                while SpeedEnabled do
+                    plr.Character.HumanoidRootPart.CFrame = plr.Character.HumanoidRootPart.CFrame + plr.Character.Humanoid.MoveDirection * getgenv().Multiplier
+                    RunService.Stepped:Wait()
                 end
             end
         end)
@@ -190,15 +232,12 @@ local SpeedButton = PlayerPageSection:Button({
 })
 
 -- Force Reset Button
-local ForceResetButton = PlayerPageSection:Button({
+PlayerPageSection:Button({
     Name = "Force Reset",
-    callback = function(value)
-        local player = game.Players.LocalPlayer
-        local character = player.Character
-
-        if character then
-            local humanoid = character:FindFirstChild("Humanoid")
-            if humanoid then humanoid.Health = 0 end
+    callback = function()
+        local plr = game.Players.LocalPlayer
+        if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+            plr.Character.Humanoid.Health = 0
         end
     end
 })
