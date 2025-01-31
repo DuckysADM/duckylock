@@ -10,12 +10,12 @@ local Page2 = Window:Page({ Name = "Visuals" })
 local Page3 = Window:Page({ Name = "Player" })
 
 local PageSection1 = Page:Section({ Name = "Main", Fill = true, Side = "Left" })
-local Page2Section2 = Page2:Section({ Name = "Main", Fill = true, Side = "Right" })
-local PlayerPageSection = Page3:Section({ Name = "Player Functions", Fill = true, Side = "Left" })
+local Page2Section2 = Page2:Section({ Name = "Visuals", Fill = true, Side = "Left" })
+local PlayerPageSection = Page3:Section({ Name = "Player", Fill = true, Side = "Left" })
 
 -- Camlock Button
 PageSection1:Button({
-    Name = "Camlock",
+    Name = "Lock (Q)",
     callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/DuckysADM/Good-Lock/refs/heads/main/Lock"))()
     end
@@ -23,7 +23,7 @@ PageSection1:Button({
 
 -- Hitbox Expander Button
 PageSection1:Button({
-    Name = "Hitbox Expander",
+    Name = "Coming soon nigger",
     callback = function()
         -- Add Hitbox Expander functionality here
     end
@@ -42,7 +42,7 @@ local function CreateESP(plr)
     if ESP_Objects[plr] then return end
 
     local text = Drawing.new("Text")
-    text.Size = 15
+    text.Size = 11
     text.Color = Color3.fromRGB(255, 255, 255)
     text.Outline = true
     text.Center = true
@@ -53,7 +53,7 @@ local function CreateESP(plr)
         if ESP_Enabled and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
             local rootPos, onScreen = Camera:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position)
             if onScreen then
-                text.Position = Vector2.new(rootPos.X, rootPos.Y - 50)
+                text.Position = Vector2.new(rootPos.X, rootPos.Y - 20)
                 text.Text = plr.Name
                 text.Visible = true
             else
@@ -89,10 +89,61 @@ Players.PlayerAdded:Connect(CreateESP)
 
 -- ESP Toggle
 Page2Section2:Toggle({
-    Name = "ESP",
+    Name = "Name ESP",
     Default = false,
     callback = function(value)
         ToggleESP(value)
+    end
+})
+
+-- Box ESP Script
+local ESP_Boxes = {}
+local function BoxESP(state)
+    if state then
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= Players.LocalPlayer then
+                local box = Drawing.new("Square")
+                box.Color = Color3.fromRGB(255, 255, 255)
+                box.Thickness = 2
+                box.Filled = false
+                ESP_Boxes[plr] = box
+            end
+        end
+
+        RunService.RenderStepped:Connect(function()
+            for player, box in pairs(ESP_Boxes) do
+                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local rootPos, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+                    if onScreen then
+                        box.Size = Vector2.new(2000 / rootPos.Z, 3000 / rootPos.Z)
+                        box.Position = Vector2.new(rootPos.X - box.Size.X / 2, rootPos.Y - box.Size.Y / 2)
+                        box.Visible = true
+                    else
+                        box.Visible = false
+                    end
+                else
+                    box.Visible = false
+                end
+            end
+        end)
+    else
+        for _, box in pairs(ESP_Boxes) do
+            box.Visible = false
+        end
+        -- Clean up boxes when turning off the toggle
+        for plr, box in pairs(ESP_Boxes) do
+            box:Remove()
+        end
+        ESP_Boxes = {}
+    end
+end
+
+-- Box ESP Toggle
+Page2Section2:Toggle({
+    Name = "Box ESP",
+    Default = false,
+    callback = function(value)
+        BoxESP(value)
     end
 })
 
