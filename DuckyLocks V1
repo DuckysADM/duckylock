@@ -1,0 +1,206 @@
+-- Load UI Library
+loadstring(game:HttpGet("https://raw.githubusercontent.com/DuckysADM/Loading/refs/heads/main/Loading.txt"))()
+
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/blix200/murcery-documentation/refs/heads/main/UI%20lib%202"))()
+
+local Window = Library:New({
+    Name = "DuckyADM Script",
+})
+
+local Page = Window:Page({ Name = "Main" })
+local Page2 = Window:Page({ Name = "Visuals" })
+local Page3 = Window:Page({ Name = "Player" })
+
+local PageSection1 = Page:Section({ Name = "Main", Fill = true, Side = "Left" })
+local Button1 = PageSection1:Button({
+    Name = "Camlock",
+    callback = function(value)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/DuckysADM/Good-Lock/refs/heads/main/Lock"))()
+    end
+})
+
+local Button2 = PageSection1:Button({
+    Name = "Hitbox Expander",
+    callback = function(value)
+        -- Hitbox Expander functionality
+    end
+})
+
+local Page2Section2 = Page2:Section({ Name = "Main", Fill = true, Side = "Right" })
+local Button1 = Page2Section2:Button({
+    Name = "Box ESP",
+    callback = function(value)
+        -- Box ESP functionality
+    end
+})
+
+local Toggle1 = PageSection1:Toggle({
+    Name = "etc",
+    Default = false,
+    callback = function(value)
+        -- etc toggle functionality
+    end
+})
+
+-- Player Page Section
+local PlayerPageSection = Page3:Section({ Name = "Player Functions", Fill = true, Side = "Left" })
+
+-- Fly Button
+local FlyButton = PlayerPageSection:Button({
+    Name = "Fly (X)",
+    callback = function(value)
+        local plr = game.Players.LocalPlayer
+        local mouse = plr:GetMouse()
+
+        if workspace:FindFirstChild("Core") then
+            workspace.Core:Destroy()
+        end
+
+        if _G.FlyConnections then
+            for _, conn in pairs(_G.FlyConnections) do
+                conn:Disconnect()
+            end
+        end
+
+        _G.FlyConnections = {}
+
+        local function setupCore()
+            if workspace:FindFirstChild("Core") then
+                workspace.Core:Destroy()
+            end
+
+            local Core = Instance.new("Part")
+            Core.Name = "Core"
+            Core.Size = Vector3.new(0.05, 0.05, 0.05)
+            Core.Parent = workspace
+
+            local Weld = Instance.new("Weld", Core)
+            Weld.Part0 = Core
+            Weld.Part1 = plr.Character:WaitForChild("LowerTorso")
+            Weld.C0 = CFrame.new(0, 0, 0)
+
+            return Core
+        end
+
+        local torso
+        local flying = false
+        local defaultSpeed = 20
+        local speed = defaultSpeed
+        local keys = { a = false, d = false, w = false, s = false }
+
+        local function startFlying()
+            local pos = Instance.new("BodyPosition", torso)
+            local gyro = Instance.new("BodyGyro", torso)
+            pos.Name = "EPIXPOS"
+            pos.maxForce = Vector3.new(math.huge, math.huge, math.huge)
+            pos.position = torso.Position
+            gyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+            gyro.cframe = torso.CFrame
+
+            repeat
+                task.wait()
+                plr.Character.Humanoid.PlatformStand = true
+                local new = gyro.cframe - gyro.cframe.p + pos.position
+
+                if not keys.w and not keys.s and not keys.a and not keys.d then
+                    speed = 5
+                else
+                    speed = defaultSpeed
+                end
+
+                if keys.w then
+                    new = new + workspace.CurrentCamera.CFrame.lookVector * speed
+                end
+                if keys.s then
+                    new = new - workspace.CurrentCamera.CFrame.lookVector * speed
+                end
+                if keys.d then
+                    new = new * CFrame.new(speed, 0, 0)
+                end
+                if keys.a then
+                    new = new * CFrame.new(-speed, 0, 0)
+                end
+
+                pos.position = new.p
+                gyro.cframe = workspace.CurrentCamera.CFrame
+            until not flying
+
+            pos:Destroy()
+            gyro:Destroy()
+            flying = false
+            plr.Character.Humanoid.PlatformStand = false
+        end
+
+        local function setupControls()
+            local e1 = mouse.KeyDown:Connect(function(key)
+                if key == "w" then keys.w = true end
+                if key == "s" then keys.s = true end
+                if key == "a" then keys.a = true end
+                if key == "d" then keys.d = true end
+                if key == "x" then
+                    flying = not flying
+                    if flying then startFlying() end
+                end
+            end)
+
+            local e2 = mouse.KeyUp:Connect(function(key)
+                if key == "w" then keys.w = false end
+                if key == "s" then keys.s = false end
+                if key == "a" then keys.a = false end
+                if key == "d" then keys.d = false end
+            end)
+
+            table.insert(_G.FlyConnections, e1)
+            table.insert(_G.FlyConnections, e2)
+        end
+
+        torso = setupCore()
+        setupControls()
+    end
+})
+
+-- Speed Button
+local SpeedButton = PlayerPageSection:Button({
+    Name = "Speed (C)",
+    callback = function(value)
+        repeat wait() until game:IsLoaded()
+
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+        repeat wait() until LocalPlayer.Character
+
+        local UserInputService = game:GetService("UserInputService")
+        local RunService = game:GetService("RunService")
+
+        getgenv().Multiplier = 6
+        local SpeedEnabled = false
+
+        UserInputService.InputBegan:Connect(function(input)
+            if input.KeyCode == Enum.KeyCode.C then
+                SpeedEnabled = not SpeedEnabled
+                if SpeedEnabled then
+                    repeat
+                        LocalPlayer.Character.HumanoidRootPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame + LocalPlayer.Character.Humanoid.MoveDirection * Multiplier
+                        RunService.Stepped:Wait()
+                    until not SpeedEnabled
+                end
+            end
+        end)
+    end
+})
+
+-- Force Reset Button
+local ForceResetButton = PlayerPageSection:Button({
+    Name = "Force Reset",
+    callback = function(value)
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+
+        if character then
+            local humanoid = character:FindFirstChild("Humanoid")
+            if humanoid then humanoid.Health = 0 end
+        end
+    end
+})
+
+Window:Initialize()
