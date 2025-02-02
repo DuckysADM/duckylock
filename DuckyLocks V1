@@ -1,9 +1,10 @@
 -- Load UI Library
 loadstring(game:HttpGet("https://raw.githubusercontent.com/DuckysADM/Loading/refs/heads/main/Loading.txt"))()
 
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/blix200/murcery-documentation/refs/heads/main/UI%20lib%202"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/DuckysADM/DuckysADM/refs/heads/main/DuckysADM%20Script.txt"))()
 
-local Window = Library:New({ Name = "DuckyADM Script" })
+
+local Window = Library:New({ Name = "DuckysADM Script 🦆🦆🦆🦆🦆" })
 
 local Page = Window:Page({ Name = "Main" })
 local Page2 = Window:Page({ Name = "Visuals" })
@@ -149,7 +150,7 @@ Page2Section2:Toggle({
 
 -- Fly Button
 PlayerPageSection:Button({
-    Name = "Fly (X)",
+    Name = "Fly [X] (RE-PRESS ON SPAWN",
     callback = function()
         local plr = game.Players.LocalPlayer
         local mouse = plr:GetMouse()
@@ -263,7 +264,7 @@ PlayerPageSection:Button({
 
 -- Speed Button
 PlayerPageSection:Button({
-    Name = "Speed (C)",
+    Name = "Speed [C]",
     callback = function()
         getgenv().Multiplier = 5
         local SpeedEnabled = false
