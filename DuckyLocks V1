@@ -1,297 +1,308 @@
--- Load UI Library
-loadstring(game:HttpGet("https://raw.githubusercontent.com/DuckysADM/Loading/refs/heads/main/Loading.txt"))()
-
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/DuckysADM/DuckysADM/refs/heads/main/DuckysADM%20Script.txt"))()
 
-
-local Window = Library:New({ Name = "DuckysADM Script 🦆🦆🦆🦆🦆" })
-
-local Page = Window:Page({ Name = "Main" })
-local Page2 = Window:Page({ Name = "Visuals" })
-local Page3 = Window:Page({ Name = "Player" })
-
-local PageSection1 = Page:Section({ Name = "Main", Fill = true, Side = "Left" })
-local Page2Section2 = Page2:Section({ Name = "Visuals", Fill = true, Side = "Left" })
-local PlayerPageSection = Page3:Section({ Name = "Player", Fill = true, Side = "Left" })
-
--- Camlock Button
-PageSection1:Button({
-    Name = "Lock (Q)",
-    callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/DuckysADM/Good-Lock/refs/heads/main/Lock"))()
-    end
+local Window = Library:New({
+    Name = "DuckyLocks", -- name, Name, title, Title
 })
 
--- Hitbox Expander Button
-PageSection1:Button({
-    Name = "Coming soon nigger",
-    callback = function()
-        -- Add Hitbox Expander functionality here
-    end
+--[[ Other Pages ]]
+local Page = Window:Page({
+    Name = "Main" -- name, Name, title, Title
 })
 
--- ESP Variables
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Camera = workspace.CurrentCamera
-local ESP_Enabled = false
-local ESP_Objects = {}
+local Page2 = Window:Page({
+    Name = "Visuals" -- name, Name, title, Title
+})
 
--- Function to Create ESP Name Tags
-local function CreateESP(plr)
-    if plr == Players.LocalPlayer then return end
-    if ESP_Objects[plr] then return end
+local PlayerPage = Window:Page({
+    Name = "Player" -- New Page for Fly and Speed
+})
 
-    local text = Drawing.new("Text")
-    text.Size = 11
-    text.Color = Color3.fromRGB(255, 255, 255)
-    text.Outline = true
-    text.Center = true
-    text.Visible = false
-    ESP_Objects[plr] = text
+local TargetPage = Window:Page({
+    Name = "Target" -- New Target Page
+})
 
-    RunService.RenderStepped:Connect(function()
-        if ESP_Enabled and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local rootPos, onScreen = Camera:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position)
-            if onScreen then
-                text.Position = Vector2.new(rootPos.X, rootPos.Y - 20)
-                text.Text = plr.Name
-                text.Visible = true
-            else
-                text.Visible = false
-            end
-        else
-            text.Visible = false
-        end
-    end)
-end
+--[[ Main Section ]]
+local PageSection1 = Page:Section({
+    Name = "Main", -- name, Name, title, Title
+    Fill = true,
+    Side = "Left"
+})
 
--- Function to Toggle ESP
-local function ToggleESP(state)
-    ESP_Enabled = state
-    if not state then
-        for _, obj in pairs(ESP_Objects) do
-            obj.Visible = false
-        end
-    else
-        for _, plr in ipairs(Players:GetPlayers()) do
-            CreateESP(plr)
-        end
-    end
-end
-
--- Apply ESP to Existing Players
-for _, player in ipairs(Players:GetPlayers()) do
-    CreateESP(player)
-end
-
--- Apply ESP to New Players
-Players.PlayerAdded:Connect(CreateESP)
-
--- ESP Toggle
-Page2Section2:Toggle({
-    Name = "Name ESP",
-    Default = false,
+local Button1 = PageSection1:Button({
+    Name = "Camlock (Q)", -- name, Name, title, Title
     callback = function(value)
-        ToggleESP(value)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/DuckysADM/Camlock/refs/heads/main/AimLock.txt"))()
     end
 })
 
--- Box ESP Script
-local ESP_Boxes = {}
-local function BoxESP(state)
-    if state then
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr ~= Players.LocalPlayer then
-                local box = Drawing.new("Square")
-                box.Color = Color3.fromRGB(255, 255, 255)
-                box.Thickness = 2
-                box.Filled = false
-                ESP_Boxes[plr] = box
-            end
-        end
-
-        RunService.RenderStepped:Connect(function()
-            for player, box in pairs(ESP_Boxes) do
-                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    local rootPos, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
-                    if onScreen then
-                        box.Size = Vector2.new(2000 / rootPos.Z, 3000 / rootPos.Z)
-                        box.Position = Vector2.new(rootPos.X - box.Size.X / 2, rootPos.Y - box.Size.Y / 2)
-                        box.Visible = true
-                    else
-                        box.Visible = false
-                    end
-                else
-                    box.Visible = false
-                end
-            end
-        end)
-    else
-        for _, box in pairs(ESP_Boxes) do
-            box.Visible = false
-        end
-        -- Clean up boxes when turning off the toggle
-        for plr, box in pairs(ESP_Boxes) do
-            box:Remove()
-        end
-        ESP_Boxes = {}
-    end
-end
-
--- Box ESP Toggle
-Page2Section2:Toggle({
-    Name = "Box ESP",
-    Default = false,
+local Button2 = PageSection1:Button({
+    Name = "Hitbox Expander", -- name, Name, title, Title
     callback = function(value)
-        BoxESP(value)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/DuckysADM/Hitbox-Expander/refs/heads/main/Hitbox%20Expander.txt"))()
     end
+})
+
+--[[ Player Settings Section ]]
+local PlayerSection = PlayerPage:Section({
+    Name = "Player Settings",
+    Fill = true,
+    Side = "Left"
 })
 
 -- Fly Button
-PlayerPageSection:Button({
-    Name = "Fly [X] (RE-PRESS ON SPAWN",
-    callback = function()
-        local plr = game.Players.LocalPlayer
-        local mouse = plr:GetMouse()
-
-        if workspace:FindFirstChild("Core") then
-            workspace.Core:Destroy()
-        end
-
-        if _G.FlyConnections then
-            for _, conn in pairs(_G.FlyConnections) do
-                conn:Disconnect()
-            end
-        end
-
-        _G.FlyConnections = {}
-
-        local function setupCore()
-            if workspace:FindFirstChild("Core") then
-                workspace.Core:Destroy()
-            end
-
-            local Core = Instance.new("Part")
-            Core.Name = "Core"
-            Core.Size = Vector3.new(0.05, 0.05, 0.05)
-            Core.Parent = workspace
-
-            local Weld = Instance.new("Weld", Core)
-            Weld.Part0 = Core
-            Weld.Part1 = plr.Character:WaitForChild("LowerTorso")
-            Weld.C0 = CFrame.new(0, 0, 0)
-
-            return Core
-        end
-
-        local torso
-        local flying = false
-        local defaultSpeed = 20
-        local speed = defaultSpeed
-        local keys = { a = false, d = false, w = false, s = false }
-
-        local function startFlying()
-            local pos = Instance.new("BodyPosition", torso)
-            local gyro = Instance.new("BodyGyro", torso)
-            pos.Name = "EPIXPOS"
-            pos.maxForce = Vector3.new(math.huge, math.huge, math.huge)
-            pos.position = torso.Position
-            gyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-            gyro.cframe = torso.CFrame
-
-            repeat
-                task.wait()
-                plr.Character.Humanoid.PlatformStand = true
-                local new = gyro.cframe - gyro.cframe.p + pos.position
-
-                if not keys.w and not keys.s and not keys.a and not keys.d then
-                    speed = 5
-                else
-                    speed = defaultSpeed
-                end
-
-                if keys.w then
-                    new = new + workspace.CurrentCamera.CFrame.lookVector * speed
-                end
-                if keys.s then
-                    new = new - workspace.CurrentCamera.CFrame.lookVector * speed
-                end
-                if keys.d then
-                    new = new * CFrame.new(speed, 0, 0)
-                end
-                if keys.a then
-                    new = new * CFrame.new(-speed, 0, 0)
-                end
-
-                pos.position = new.p
-                gyro.cframe = workspace.CurrentCamera.CFrame
-            until not flying
-
-            pos:Destroy()
-            gyro:Destroy()
-            flying = false
-            plr.Character.Humanoid.PlatformStand = false
-        end
-
-        local function setupControls()
-            local e1 = mouse.KeyDown:Connect(function(key)
-                if key == "w" then keys.w = true end
-                if key == "s" then keys.s = true end
-                if key == "a" then keys.a = true end
-                if key == "d" then keys.d = true end
-                if key == "x" then
-                    flying = not flying
-                    if flying then startFlying() end
-                end
-            end)
-
-            local e2 = mouse.KeyUp:Connect(function(key)
-                if key == "w" then keys.w = false end
-                if key == "s" then keys.s = false end
-                if key == "a" then keys.a = false end
-                if key == "d" then keys.d = false end
-            end)
-
-            table.insert(_G.FlyConnections, e1)
-            table.insert(_G.FlyConnections, e2)
-        end
-
-        torso = setupCore()
-        setupControls()
+local FlyButton = PlayerSection:Button({
+    Name = "Fly (X)", -- name, Name, title, Title
+    callback = function(value)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/DuckysADM/Fly/refs/heads/main/Fly.txt"))()
     end
 })
 
 -- Speed Button
-PlayerPageSection:Button({
-    Name = "Speed [C]",
-    callback = function()
-        getgenv().Multiplier = 5
-        local SpeedEnabled = false
-        local plr = game.Players.LocalPlayer
-        local RunService = game:GetService("RunService")
-
-        game:GetService("UserInputService").InputBegan:Connect(function(input)
-            if input.KeyCode == Enum.KeyCode.C then
-                SpeedEnabled = not SpeedEnabled
-                while SpeedEnabled do
-                    plr.Character.HumanoidRootPart.CFrame = plr.Character.HumanoidRootPart.CFrame + plr.Character.Humanoid.MoveDirection * getgenv().Multiplier
-                    RunService.Stepped:Wait()
-                end
-            end
-        end)
+local SpeedButton = PlayerSection:Button({
+    Name = "Speed (C)", -- name, Name, title, Title
+    callback = function(value)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/DuckysADM/Speed/refs/heads/main/Speed"))()
     end
 })
 
--- Force Reset Button
-PlayerPageSection:Button({
-    Name = "Force Reset",
-    callback = function()
-        local plr = game.Players.LocalPlayer
-        if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-            plr.Character.Humanoid.Health = 0
+-- ForceReset Button
+local Button1 = PlayerSection:Button({
+    Name = "ForceReset", -- name, Name, title, Title
+    callback = function(value)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/DuckysADM/Force-Reset/refs/heads/main/Force%20Reset"))()
+    end
+})
+
+
+--[[ Teleports Page ]]
+local TeleportsPage = Window:Page({
+    Name = "Teleports"
+})
+
+local TeleportsSectionLeft = TeleportsPage:Section({
+    Name = "Teleports",
+    Fill = true,
+    Side = "Left"
+})
+
+local TeleportsSectionRight = TeleportsPage:Section({
+    Name = "Teleports",
+    Fill = true,
+    Side = "Right"
+})
+
+-- Local Player Reference
+local LocalPlayer = game.Players.LocalPlayer
+
+-- Function to Teleport to a Location
+local function teleportToLocation(cframe)
+    if LocalPlayer.Character then
+        local rootPart = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if rootPart then
+            rootPart.CFrame = cframe
+        else
+            warn("HumanoidRootPart not found!")
+        end
+    else
+        warn("Character not found!")
+    end
+end
+
+-- List of Teleports
+local teleportsLeft = loadstring(game:HttpGet("https://raw.githubusercontent.com/DuckysADM/LeftTPS/main/TP"))()
+local teleportsRight = loadstring(game:HttpGet("https://raw.githubusercontent.com/DuckysADM/RightTP/main/TP"))()
+
+-- Add teleport buttons
+for _, teleport in pairs(teleportsLeft) do
+    TeleportsSectionLeft:Button({
+        Name = teleport.Name,
+        callback = function()
+            teleportToLocation(teleport.CFrame)
+        end
+    })
+end
+
+for _, teleport in pairs(teleportsRight) do
+    TeleportsSectionRight:Button({
+        Name = teleport.Name,
+        callback = function()
+            teleportToLocation(teleport.CFrame)
+        end
+    })
+end
+
+--[[ Target Page - Teleport to Player ]]
+local TargetSection = TargetPage:Section({
+    Name = "Teleport to Player", -- name, Name, title, Title
+    Fill = true,
+    Side = "Left"
+})
+
+-- Function to teleport to a selected player
+local function teleportToPlayer(playerDisplayName)
+    local player = nil
+    for _, p in ipairs(game.Players:GetPlayers()) do
+        if p.DisplayName == playerDisplayName then
+            player = p
+            break
         end
     end
+
+    if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local rootPart = player.Character.HumanoidRootPart
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = rootPart.CFrame
+    else
+        warn("Player not found or character is not loaded.")
+    end
+end
+
+-- Get player names to display in the dropdown
+local PlayerNames = {}
+for _, player in ipairs(game.Players:GetPlayers()) do
+    table.insert(PlayerNames, player.DisplayName)
+end
+
+-- Create a dropdown for selecting a player to teleport to
+local PlayerDropdown = TargetSection:Dropdown({
+    Name = "Select Player", -- Dropdown title
+    Options = PlayerNames, -- List of player names
+    callback = function(selectedPlayer)
+        teleportToPlayer(selectedPlayer) -- teleport to selected player
+    end
 })
 
-Window:Initialize()
+-- Update the player list when a player joins or leaves the game
+game.Players.PlayerAdded:Connect(function(player)
+    table.insert(PlayerNames, player.Name)
+    PlayerDropdown:SetOptions(PlayerNames) -- Update dropdown options
+end)
+
+game.Players.PlayerRemoving:Connect(function(player)
+    for i, name in ipairs(PlayerNames) do
+        if name == player.Name then
+            table.remove(PlayerNames, i)
+            break
+        end
+    end
+    PlayerDropdown:SetOptions(PlayerNames) -- Update dropdown options
+end)
+
+--[[ Visuals Section ]]
+local vis = Page2:Section({
+    Name = "Visuals"
+})
+
+local plrs = game:GetService("Players")
+
+local ESPBoxes = {}
+local NameLabels = {}
+local updating = false
+local updatingNames = false
+
+local function updateESP(state)
+    if state then
+        updating = true
+        for _, player in pairs(plrs:GetPlayers()) do
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local box = ESPBoxes[player] or Drawing.new("Square")
+                box.Color = Color3.fromRGB(255, 255, 255)
+                box.Thickness = 0.7
+                box.Transparency = 1
+                box.Filled = false
+                ESPBoxes[player] = box
+            end
+        end
+
+        -- Updates the ESP boxes in real-time
+        task.spawn(function()
+            while updating do
+                for player, box in pairs(ESPBoxes) do
+                    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                        local rootPart = player.Character.HumanoidRootPart
+                        local screenPos, onScreen = game.Workspace.CurrentCamera:WorldToViewportPoint(rootPart.Position)
+
+                        if onScreen then
+                            box.Size = Vector2.new(2000 / screenPos.Z, 3000 / screenPos.Z)
+                            box.Position = Vector2.new(screenPos.X - box.Size.X / 2, screenPos.Y - box.Size.Y / 2)
+                            box.Visible = true
+                        else
+                            box.Visible = false
+                        end
+                    else
+                        box.Visible = false
+                    end
+                end
+                task.wait(1 / 148)
+            end
+        end)
+    else
+        updating = false
+        for _, box in pairs(ESPBoxes) do
+            box:Remove()
+        end
+        ESPBoxes = {}
+    end
+end
+
+local function updateNames(state)
+    if state then
+        updatingNames = true
+        for _, player in pairs(plrs:GetPlayers()) do
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local nameLabel = NameLabels[player] or Drawing.new("Text")
+                nameLabel.Text = player.Name
+                nameLabel.Size = 15
+                nameLabel.Color = Color3.fromRGB(255, 255, 255)
+                nameLabel.Center = true
+                nameLabel.Outline = true
+                NameLabels[player] = nameLabel
+            end
+        end
+
+        -- Updates the name labels in real-time
+        task.spawn(function()
+            while updatingNames do
+                for player, nameLabel in pairs(NameLabels) do
+                    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                        local rootPart = player.Character.HumanoidRootPart
+                        local headPos, onScreen = game.Workspace.CurrentCamera:WorldToViewportPoint(rootPart.Position + Vector3.new(0, 3, 0))
+
+                        if onScreen then
+                            nameLabel.Position = Vector2.new(headPos.X, headPos.Y)
+                            nameLabel.Visible = true
+                        else
+                            nameLabel.Visible = false
+                        end
+                    else
+                        nameLabel.Visible = false
+                    end
+                end
+                task.wait(1 / 148)
+            end
+        end)
+    else
+        updatingNames = false
+        for _, nameLabel in pairs(NameLabels) do
+            nameLabel:Remove()
+        end
+        NameLabels = {}
+    end
+end
+
+vis:Toggle({
+    Name = "ESP Boxes",
+    Default = false,
+    callback = function(value)
+        updateESP(value)
+    end
+})
+
+vis:Toggle({
+    Name = "Name Tags",
+    Default = false,
+    callback = function(value)
+        updateNames(value)
+    end
+})
+
+Window:Initialize() -- Initialize the UI
